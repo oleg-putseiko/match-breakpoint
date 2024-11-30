@@ -6,6 +6,7 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "node",
+    "outDir": "dist",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -13,6 +14,6 @@
     "stripInternal": true,
     "target": "ES2015"
   },
-  "exclude": ["node_modules"],
+  "exclude": ["dist", "node_modules"],
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

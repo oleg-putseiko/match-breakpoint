@@ -1,4 +1,4 @@
-export type CSSMode = 'tailwind';
+export type ClassNamePreset = 'tailwind';
 
 type ClassDictionary = Record<string, unknown>;
 type ClassArray = ClassValue[];

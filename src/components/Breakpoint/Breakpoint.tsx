@@ -13,11 +13,9 @@ import {
   type ScreenSize,
 } from '@/types/breakpoints';
 import { type ExtractRef, type RenderFunction } from '@/types/react';
-import { type CSSMode } from '@/types/styles';
 
-import { TailwindBreakpoint } from '@/components/Breakpoint/TailwindBreakpoint';
-import { useBreakpointsContext } from '@/components/MatchBreakpointProvider/BreakpointsProvider';
-import { useMatchBreakpoint } from '@/components/MatchBreakpointProvider/MatchBreakpointProvider';
+import { BreakpointChild } from '@/components/Breakpoint/BreakpointChild';
+import { useMatchBreakpoint } from '@/components/BreakpointsProvider';
 
 type BreakpointControlledProps<T extends ElementType> = {
   as?: T;
@@ -25,7 +23,6 @@ type BreakpointControlledProps<T extends ElementType> = {
   breakpoints?: Breakpoints;
   matchTo?: MatchTo;
   isDefaultMatches?: boolean;
-  cssMode?: CSSMode;
   children: ReactNode;
 };
 
@@ -50,12 +47,9 @@ const BreakpointRenderFunction = <
     size,
     matchTo = 'min',
     isDefaultMatches = true,
-    cssMode: cssModeFromProp,
     children,
     ...componentProps
   } = props;
-
-  const { cssMode: cssModeFromContext } = useBreakpointsContext();
 
   const shouldRenderChildren = useMatchBreakpoint(
     size,
@@ -65,26 +59,16 @@ const BreakpointRenderFunction = <
 
   if (!shouldRenderChildren) return null;
 
-  const cssMode = cssModeFromProp ?? cssModeFromContext;
-
-  return Children.map(children, (child) => {
-    if (cssMode === 'tailwind') {
-      return (
-        <TailwindBreakpoint
-          {...componentProps}
-          ref={ref}
-          as={as}
-          size={size}
-          matchTo={matchTo}
-          child={child}
-        />
-      );
-    }
-
-    throw new TypeError(
-      `"${cssMode}" is not supported CSS mode. Use 'tailwind' instead.`,
-    );
-  });
+  return Children.map(children, (child) => (
+    <BreakpointChild
+      {...componentProps}
+      ref={ref}
+      as={as}
+      size={size}
+      matchTo={matchTo}
+      child={child}
+    />
+  ));
 };
 
 export const Breakpoint = forwardRef(

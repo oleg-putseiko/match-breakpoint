@@ -11,7 +11,7 @@ import { type BreakpointData } from '@/types/breakpoints';
 
 import { getMinScreenWidth } from '@/utils/screen-width';
 
-export type BreakpointContext = {
+type BreakpointContext = {
   isMatches: boolean | null;
 };
 

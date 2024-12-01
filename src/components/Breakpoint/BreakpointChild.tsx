@@ -11,12 +11,20 @@ import {
 
 import { type MatchTo, type ScreenSize } from '@/types/breakpoints';
 import { type ExtractRef, type RenderFunction } from '@/types/react';
-import { type MergeClassesFunction } from '@/types/styles';
+import {
+  type ClassNamePreset,
+  type MergeClassesFunction,
+} from '@/types/styles';
 
 import { getMaxScreenWidth, getMinScreenWidth } from '@/utils/screen-width';
 
-import { type ContextualizedBreakpointData } from '@/components/MatchBreakpointProvider/BreakpointProvider';
-import { useBreakpointsContext } from '@/components/MatchBreakpointProvider/BreakpointsProvider';
+import { type ContextualizedBreakpointData } from '@/components/BreakpointsProvider/BreakpointProvider';
+import { useBreakpointsContext } from '@/components/BreakpointsProvider/BreakpointsProvider';
+
+type ClassNamePresetData = {
+  maxClassName: string;
+  minClassName: string;
+};
 
 type BaseComponentProps = {
   style?: CSSProperties;
@@ -28,6 +36,7 @@ type PropsBuilderOptions<E extends ElementType> = {
   initialProps?: BaseComponentProps;
   matchTo: MatchTo;
   breakpoint: ContextualizedBreakpointData;
+  classNamePreset?: ClassNamePreset;
   mergeClassesFunction: MergeClassesFunction;
 };
 
@@ -48,9 +57,25 @@ type TailwindBreakpointProps<E extends ElementType> = ComponentNativeProps<E> &
 
 const DEFAULT_COMPONENT = Fragment;
 
+const CLASS_NAME_PRESETS: Record<ClassNamePreset, ClassNamePresetData> = {
+  tailwind: {
+    maxClassName: 'min-[var(--max-screen-width)]:hidden',
+    minClassName: 'max-[var(--min-screen-width)]:hidden',
+  },
+};
+
 const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
-  const { ref, initialProps, matchTo, breakpoint, mergeClassesFunction } =
-    options;
+  const {
+    ref,
+    initialProps,
+    matchTo,
+    breakpoint,
+    classNamePreset,
+    mergeClassesFunction,
+  } = options;
+
+  const classNamePresetData =
+    classNamePreset !== undefined ? CLASS_NAME_PRESETS[classNamePreset] : null;
 
   if (matchTo === 'max') {
     return {
@@ -58,11 +83,13 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
       ref,
       style: {
         ...initialProps?.style,
-        ['--mb-screen-max-width']: getMaxScreenWidth(breakpoint.data),
+        ['--max-screen-width']: getMaxScreenWidth(breakpoint.data),
       },
       className: mergeClassesFunction(
         initialProps?.className,
-        'min-[var(--mb-screen-max-width)]:hidden',
+        typeof breakpoint.data === 'object'
+          ? (breakpoint.data.maxClassName ?? classNamePresetData?.maxClassName)
+          : classNamePresetData?.maxClassName,
       ),
     };
   }
@@ -72,16 +99,18 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
     ref,
     style: {
       ...initialProps?.style,
-      ['--mb-screen-min-width']: getMinScreenWidth(breakpoint.data),
+      ['--min-screen-width']: getMinScreenWidth(breakpoint.data),
     },
     className: mergeClassesFunction(
       initialProps?.className,
-      'max-[var(--mb-screen-min-width)]:hidden',
+      typeof breakpoint.data === 'object'
+        ? (breakpoint.data.minClassName ?? classNamePresetData?.minClassName)
+        : classNamePresetData?.minClassName,
     ),
   };
 };
 
-const TailwindBreakpointRenderFunction = <
+const BreakpointChildRenderFunction = <
   T extends ElementType = typeof DEFAULT_COMPONENT,
 >(
   props: TailwindBreakpointProps<T>,
@@ -95,7 +124,8 @@ const TailwindBreakpointRenderFunction = <
     ...componentProps
   } = props;
 
-  const { breakpoints, mergeClassesFunction } = useBreakpointsContext();
+  const { breakpoints, classNamePreset, mergeClassesFunction } =
+    useBreakpointsContext();
 
   const breakpoint = breakpoints[size];
 
@@ -110,6 +140,7 @@ const TailwindBreakpointRenderFunction = <
         initialProps: child.props,
         matchTo,
         breakpoint,
+        classNamePreset,
         mergeClassesFunction,
       }),
     );
@@ -119,10 +150,11 @@ const TailwindBreakpointRenderFunction = <
     return (
       <Component
         {...buildProps({
-          ref,
           initialProps: componentProps,
+          ref,
           matchTo,
           breakpoint,
+          classNamePreset,
           mergeClassesFunction,
         })}
       >
@@ -136,6 +168,7 @@ const TailwindBreakpointRenderFunction = <
       {...buildProps({
         matchTo,
         breakpoint,
+        classNamePreset,
         mergeClassesFunction,
       })}
     >
@@ -144,8 +177,8 @@ const TailwindBreakpointRenderFunction = <
   );
 };
 
-export const TailwindBreakpoint = forwardRef(
-  TailwindBreakpointRenderFunction as RenderFunction<
+export const BreakpointChild = forwardRef(
+  BreakpointChildRenderFunction as RenderFunction<
     TailwindBreakpointProps<ElementType>
   >,
-) as typeof TailwindBreakpointRenderFunction;
+) as typeof BreakpointChildRenderFunction;

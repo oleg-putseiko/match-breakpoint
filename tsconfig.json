@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "module": "ESNext",
+    "module": "ES6",
     "moduleResolution": "node",
-    "outDir": "dist",
+    "outDir": "dist/src",
     "paths": {
       "@/*": ["./src/*"]
     },
+    "rootDir": "./",
     "strict": true,
     "stripInternal": true,
     "target": "ES2015"

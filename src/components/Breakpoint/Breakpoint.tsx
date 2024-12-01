@@ -7,7 +7,11 @@ import {
   type ReactNode,
 } from 'react';
 
-import { type MatchTo, type ScreenSize } from '@/types/breakpoints';
+import {
+  type Breakpoints,
+  type MatchTo,
+  type ScreenSize,
+} from '@/types/breakpoints';
 import { type ExtractRef, type RenderFunction } from '@/types/react';
 import { type CSSMode } from '@/types/styles';
 
@@ -18,6 +22,7 @@ import { useMatchBreakpoint } from '@/components/MatchBreakpointProvider/MatchBr
 type BreakpointControlledProps<T extends ElementType> = {
   as?: T;
   size: ScreenSize;
+  breakpoints?: Breakpoints;
   matchTo?: MatchTo;
   isDefaultMatches?: boolean;
   cssMode?: CSSMode;

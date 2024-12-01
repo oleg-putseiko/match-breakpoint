@@ -8,7 +8,7 @@
     "jsx": "react-jsx",
     "module": "ES6",
     "moduleResolution": "node",
-    "outDir": "dist/src",
+    "outDir": "dist",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -18,5 +18,5 @@
     "target": "ES2015"
   },
   "exclude": ["dist", "node_modules"],
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx"]
 }

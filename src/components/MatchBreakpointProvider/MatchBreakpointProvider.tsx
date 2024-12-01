@@ -59,7 +59,7 @@ export const MatchBreakpointProvider: FC<MatchMediaProviderProps> = (props) => {
         (acc, key) => ({
           ...acc,
           [key]: {
-            data: breakpoints[key],
+            data: breakpoints[key as keyof typeof breakpoints],
             context: createContext({ ...DEFAULT_BREAKPOINT_CONTEXT }),
           },
         }),

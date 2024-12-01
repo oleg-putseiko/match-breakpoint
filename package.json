@@ -15,13 +15,17 @@
   },
   "main": "dist/src/index.js",
   "files": [
-    "dist/src/components/**/*",
-    "dist/src/utils/**/*",
+    "dist/src/components/**/*.d.ts",
+    "dist/src/components/**/*.js",
+    "dist/src/types/**/*.d.ts",
+    "dist/src/utils/**/*.d.ts",
+    "dist/src/utils/**/*.js",
+    "dist/src/index.d.ts",
     "dist/src/index.js"
   ],
   "exports": "./dist/src/index.js",
   "scripts": {
-    "build": "swc ./src/**/* -d dist && tsc --emitDeclarationOnly && tsc-alias",
+    "build": "swc src -d dist && tsc --emitDeclarationOnly && tsc-alias",
     "format": "prettier -c .",
     "format:fix": "prettier -w .",
     "lint": "eslint ./src/**/*.{js,ts,tsx,json}",

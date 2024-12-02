@@ -40,7 +40,6 @@
     "lint:fix": "eslint ./src/**/*.{js,ts,tsx,json} --fix && yarn format:fix",
     "lint:strict": "eslint ./src/**/*.{js,ts,tsx,json} --max-warnings=0 && yarn format",
     "prepare": "husky install | chmod +x ./.husky/*",
-    "test": "jest",
     "typecheck": "tsc --noEmit --incremental false"
   },
   "peerDependencies": {

@@ -13,19 +13,19 @@
   "bugs": {
     "url": "https://github.com/oleg-putseiko/match-breakpoint/issues"
   },
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "files": [
-    "dist/src/components/**/*.d.ts",
-    "dist/src/components/**/*.js",
-    "dist/src/types/**/*.d.ts",
-    "dist/src/utils/**/*.d.ts",
-    "dist/src/utils/**/*.js",
-    "dist/src/index.d.ts",
-    "dist/src/index.js"
+    "dist/components/**/*.d.ts",
+    "dist/components/**/*.js",
+    "dist/types/**/*.d.ts",
+    "dist/utils/**/*.d.ts",
+    "dist/utils/**/*.js",
+    "dist/index.d.ts",
+    "dist/index.js"
   ],
-  "exports": "./dist/src/index.js",
+  "exports": "./dist/index.js",
   "scripts": {
-    "build": "swc src -d dist && tsc --emitDeclarationOnly && tsc-alias",
+    "build": "swc src -d dist --strip-leading-paths && tsc --emitDeclarationOnly && tsc-alias",
     "format": "prettier -c .",
     "format:fix": "prettier -w .",
     "lint": "eslint ./src/**/*.{js,ts,tsx,json}",
@@ -42,7 +42,7 @@
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
-    "@swc/cli": "^0.5.1",
+    "@swc/cli": "^0.5.2",
     "@swc/core": "^1.9.3",
     "@types/react": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^6.9.1",

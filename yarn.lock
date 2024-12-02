@@ -537,16 +537,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/cli@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@swc/cli@npm:0.5.1"
+"@swc/cli@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@swc/cli@npm:0.5.2"
   dependencies:
     "@swc/counter": ^0.1.3
     "@xhmikosr/bin-wrapper": ^13.0.5
     commander: ^8.3.0
     fast-glob: ^3.2.5
     minimatch: ^9.0.3
-    piscina: ^4.3.0
+    piscina: ^4.3.1
     semver: ^7.3.8
     slash: 3.0.0
     source-map: ^0.7.3
@@ -560,7 +560,7 @@ __metadata:
     spack: bin/spack.js
     swc: bin/swc.js
     swcx: bin/swcx.js
-  checksum: 46443f1d3ec0281d845e32e3b55cafa7816589954b8f8776df694dc289be863fbd844124b78c44b51e42307169b5cad4dc83a9d754e57104874ed94127366894
+  checksum: c22f78813fe5a606c7a4b2901d57d325d28f8092dc0bad98be5fa9d108887d89a8c5aad96c7c3e3fa2c93447d3b71d6ef0d32514b8fef7825af7ce08089edef0
   languageName: node
   linkType: hard
 
@@ -3760,7 +3760,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": ^18.2.0
     "@commitlint/config-conventional": ^18.1.0
-    "@swc/cli": ^0.5.1
+    "@swc/cli": ^0.5.2
     "@swc/core": ^1.9.3
     "@types/react": ^18.0.0
     "@typescript-eslint/eslint-plugin": ^6.9.1
@@ -4428,7 +4428,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"piscina@npm:^4.3.0":
+"piscina@npm:^4.3.1":
   version: 4.7.0
   resolution: "piscina@npm:4.7.0"
   dependencies:

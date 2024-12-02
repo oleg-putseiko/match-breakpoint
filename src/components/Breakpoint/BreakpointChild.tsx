@@ -88,7 +88,7 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
       className: mergeClassesFunction(
         initialProps?.className,
         typeof breakpoint.data === 'object'
-          ? (breakpoint.data.maxClassName ?? classNamePresetData?.maxClassName)
+          ? breakpoint.data.maxClassName || classNamePresetData?.maxClassName
           : classNamePresetData?.maxClassName,
       ),
     };
@@ -104,7 +104,7 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
     className: mergeClassesFunction(
       initialProps?.className,
       typeof breakpoint.data === 'object'
-        ? (breakpoint.data.minClassName ?? classNamePresetData?.minClassName)
+        ? breakpoint.data.minClassName || classNamePresetData?.minClassName
         : classNamePresetData?.minClassName,
     ),
   };

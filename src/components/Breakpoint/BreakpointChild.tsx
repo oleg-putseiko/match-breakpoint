@@ -16,7 +16,7 @@ import {
   type MergeClassesFunction,
 } from '@/types/styles';
 
-import { getMaxScreenWidth, getMinScreenWidth } from '@/utils/screen-width';
+import { extractBreakpointValue } from '@/utils/screen-width';
 
 import { type ContextualizedBreakpointData } from '@/components/BreakpointsProvider/BreakpointProvider';
 import { useBreakpointsContext } from '@/components/BreakpointsProvider/BreakpointsProvider';
@@ -59,8 +59,8 @@ const DEFAULT_COMPONENT = Fragment;
 
 const CLASS_NAME_PRESETS: Record<ClassNamePreset, ClassNamePresetData> = {
   tailwind: {
-    maxClassName: 'min-[var(--max-screen-width)]:hidden',
-    minClassName: 'max-[var(--min-screen-width)]:hidden',
+    maxClassName: 'min-[var(--breakpoint)]:hidden',
+    minClassName: 'max-[var(--breakpoint)]:hidden',
   },
 };
 
@@ -76,6 +76,7 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
 
   const classNamePresetData =
     classNamePreset !== undefined ? CLASS_NAME_PRESETS[classNamePreset] : null;
+  const breakpointValue = extractBreakpointValue(breakpoint.data);
 
   if (matchTo === 'max') {
     return {
@@ -83,7 +84,7 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
       ref,
       style: {
         ...initialProps?.style,
-        ['--max-screen-width']: getMaxScreenWidth(breakpoint.data),
+        ['--breakpoint']: breakpointValue,
       },
       className: mergeClassesFunction(
         initialProps?.className,
@@ -99,7 +100,7 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
     ref,
     style: {
       ...initialProps?.style,
-      ['--min-screen-width']: getMinScreenWidth(breakpoint.data),
+      ['--breakpoint']: breakpointValue,
     },
     className: mergeClassesFunction(
       initialProps?.className,

@@ -1,8 +1,7 @@
 export type MatchTo = 'min' | 'max';
 
-type BreakpointDataDetails = {
-  min: string | number;
-  max: string | number;
+export type BreakpointDataDetails = {
+  value: string | number;
   minClassName?: string;
   maxClassName?: string;
 };

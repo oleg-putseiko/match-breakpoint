@@ -1,1 +1,4 @@
-export * from '@/components/BreakpointsProvider/BreakpointsProvider';
+export {
+  BreakpointsProvider,
+  useBreakpoint,
+} from '@/components/BreakpointsProvider/BreakpointsProvider';

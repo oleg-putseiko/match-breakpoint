@@ -1,67 +1,71 @@
 import {
   cloneElement,
   type ComponentProps,
-  type CSSProperties,
   type ElementType,
+  type ForwardedRef,
   forwardRef,
-  Fragment,
+  type ForwardRefRenderFunction,
   isValidElement,
+  type PropsWithoutRef,
   type ReactNode,
 } from 'react';
 
 import { type MatchTo, type ScreenSize } from '@/types/breakpoints';
-import { type ExtractRef, type RenderFunction } from '@/types/react';
 import { type CSSPresetName, type MergeClassesFunction } from '@/types/styles';
 
-import { ensureBreakpointPx } from '@/utils/screen-width';
+import { ensurePx } from '@/utils/screen-width';
 
 import { type ContextualizedBreakpointData } from '@/components/BreakpointsProvider/BreakpointProvider';
 import { useBreakpointsContext } from '@/components/BreakpointsProvider/BreakpointsProvider';
 
-type CSSPresetData = {
+type AnyProps = Record<string | symbol | number, any>;
+
+type CSSPresetClassNames = {
   maxClassName: string;
   minClassName: string;
 };
 
-type BaseComponentProps = {
-  style?: CSSProperties;
-  className?: string;
-};
-
-type PropsBuilderOptions<E extends ElementType> = {
-  ref?: ExtractRef<TailwindBreakpointProps<E>>;
-  initialProps?: BaseComponentProps;
+type ComponentPropsBuilderOptions<TElement extends ElementType> = {
+  ref?: BreakpointChildRef<TElement>;
+  initialProps?: AnyProps;
   matchTo: MatchTo;
   breakpoint: ContextualizedBreakpointData;
   cssPreset?: CSSPresetName;
   mergeClassesFunction: MergeClassesFunction;
 };
 
-type ControlledProps<E extends ElementType> = {
-  as?: E;
+type BreakpointChildControlledProps<TElement extends ElementType> = {
+  as?: TElement;
   size: ScreenSize;
   matchTo: MatchTo;
   child: ReactNode;
 };
 
-type ComponentNativeProps<E extends ElementType> = Omit<
-  ComponentProps<E>,
-  'children' | keyof ControlledProps<E>
+type BreakpointChildNativeProps<TElement extends ElementType> = Omit<
+  ComponentProps<TElement>,
+  'children' | keyof BreakpointChildControlledProps<TElement>
 >;
 
-type TailwindBreakpointProps<E extends ElementType> = ComponentNativeProps<E> &
-  ControlledProps<E>;
+type BreakpointChildProps<TElement extends ElementType> =
+  BreakpointChildNativeProps<TElement> &
+    BreakpointChildControlledProps<TElement>;
 
-const DEFAULT_COMPONENT = Fragment;
+type BreakpointChildRef<TElement extends ElementType> = ForwardedRef<
+  TElement extends keyof HTMLElementTagNameMap
+    ? HTMLElementTagNameMap[TElement]
+    : HTMLElement
+>;
 
-const CLASS_NAME_PRESETS: Record<CSSPresetName, CSSPresetData> = {
+const CLASS_NAME_PRESETS: Record<CSSPresetName, CSSPresetClassNames> = {
   tailwind: {
     maxClassName: 'min-[var(--breakpoint)]:hidden',
     minClassName: 'max-[var(--breakpoint)]:hidden',
   },
 };
 
-const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
+const buildComponentProps = <TElement extends ElementType>(
+  options: ComponentPropsBuilderOptions<TElement>,
+) => {
   const {
     ref,
     initialProps,
@@ -84,28 +88,20 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
     ref,
     style: {
       ...initialProps?.style,
-      ['--breakpoint']: ensureBreakpointPx(breakpoint.data),
+      ['--breakpoint']: ensurePx(breakpoint.data),
     },
     className: mergeClassesFunction(initialProps?.className, className),
-  };
+  } as ComponentProps<TElement>;
 };
 
-const BreakpointChildRenderFunction = <
-  T extends ElementType = typeof DEFAULT_COMPONENT,
->(
-  props: TailwindBreakpointProps<T>,
-  ref: ExtractRef<ComponentNativeProps<T>>,
+const _BreakpointChild = (<TElement extends ElementType>(
+  props: BreakpointChildProps<TElement>,
+  ref: BreakpointChildRef<TElement>,
 ) => {
-  const {
-    as: Component = DEFAULT_COMPONENT,
-    size,
-    matchTo,
-    child,
-    ...componentProps
-  } = props;
+  const context = useBreakpointsContext();
 
-  const { breakpoints, cssPreset, mergeClassesFunction } =
-    useBreakpointsContext();
+  const { as: Component, size, matchTo, child, ...componentProps } = props;
+  const { breakpoints, cssPreset, mergeClassesFunction } = context;
 
   const breakpoint = breakpoints[size];
 
@@ -113,10 +109,10 @@ const BreakpointChildRenderFunction = <
     throw new Error(`Breakpoint with screen size "${size}" is not defined`);
   }
 
-  if (Component === Fragment && isValidElement(child)) {
+  if (!Component && isValidElement(child)) {
     return cloneElement(
       child,
-      buildProps({
+      buildComponentProps({
         initialProps: child.props,
         matchTo,
         breakpoint,
@@ -126,39 +122,42 @@ const BreakpointChildRenderFunction = <
     );
   }
 
-  if (Component !== Fragment) {
+  if (Component) {
     return (
       <Component
-        {...buildProps({
-          initialProps: componentProps,
+        {...buildComponentProps({
+          initialProps: { ...componentProps, children: child },
           ref,
           matchTo,
           breakpoint,
           cssPreset,
           mergeClassesFunction,
         })}
-      >
-        {child}
-      </Component>
+      />
     );
   }
 
   return (
     <div
-      {...buildProps({
+      {...buildComponentProps({
+        initialProps: { children: child },
         matchTo,
         breakpoint,
         cssPreset,
         mergeClassesFunction,
       })}
-    >
-      {child}
-    </div>
+    />
   );
-};
+}) satisfies ForwardRefRenderFunction<
+  HTMLElement,
+  BreakpointChildProps<ElementType>
+>;
 
-export const BreakpointChild = forwardRef(
-  BreakpointChildRenderFunction as RenderFunction<
-    TailwindBreakpointProps<ElementType>
+const BreakpointChild = forwardRef(
+  _BreakpointChild as ForwardRefRenderFunction<
+    HTMLElement,
+    PropsWithoutRef<BreakpointChildProps<ElementType>>
   >,
-) as typeof BreakpointChildRenderFunction;
+) as typeof _BreakpointChild;
+
+export { BreakpointChild };

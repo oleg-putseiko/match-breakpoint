@@ -1,1 +1,1 @@
-export * from '@/components/Breakpoint/Breakpoint';
+export { Breakpoint } from '@/components/Breakpoint/Breakpoint';

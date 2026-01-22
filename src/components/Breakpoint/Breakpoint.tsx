@@ -1,49 +1,50 @@
 import {
   Children,
-  type ComponentPropsWithoutRef,
+  type ComponentProps,
   type ElementType,
+  type ForwardedRef,
   forwardRef,
+  type ForwardRefRenderFunction,
   Fragment,
+  type PropsWithoutRef,
   type ReactNode,
 } from 'react';
 
-import {
-  type Breakpoints,
-  type MatchTo,
-  type ScreenSize,
-} from '@/types/breakpoints';
-import { type ExtractRef, type RenderFunction } from '@/types/react';
+import { type MatchTo, type ScreenSize } from '@/types/breakpoints';
 
 import { BreakpointChild } from '@/components/Breakpoint/BreakpointChild';
 import { useBreakpoint } from '@/components/BreakpointsProvider';
 
-type BreakpointControlledProps<T extends ElementType> = {
-  as?: T;
+type FragmentFC = typeof Fragment;
+
+type BreakpointControlledProps<TElement extends ElementType> = {
+  as?: TElement;
   size: ScreenSize;
-  breakpoints?: Breakpoints;
   matchTo?: MatchTo;
   isDefaultMatches?: boolean;
   children: ReactNode;
 };
 
-type BreakpointComponentNativeProps<T extends ElementType> = Omit<
-  ComponentPropsWithoutRef<T>,
-  keyof BreakpointControlledProps<T>
+type BreakpointNativeProps<TElement extends ElementType> = Omit<
+  ComponentProps<TElement>,
+  keyof BreakpointControlledProps<TElement>
 >;
 
-type BreakpointProps<T extends ElementType> =
-  BreakpointComponentNativeProps<T> & BreakpointControlledProps<T>;
+type BreakpointProps<TElement extends ElementType> =
+  BreakpointNativeProps<TElement> & BreakpointControlledProps<TElement>;
 
-const DEFAULT_COMPONENT = Fragment;
+type BreakpointRef<TElement extends ElementType> = ForwardedRef<
+  TElement extends keyof HTMLElementTagNameMap
+    ? HTMLElementTagNameMap[TElement]
+    : HTMLElement
+>;
 
-const BreakpointRenderFunction = <
-  T extends ElementType = typeof DEFAULT_COMPONENT,
->(
-  props: BreakpointProps<T>,
-  ref: ExtractRef<BreakpointComponentNativeProps<T>>,
-) => {
+const _Breakpoint = (<TElement extends ElementType = FragmentFC>(
+  props: BreakpointProps<TElement>,
+  ref: BreakpointRef<TElement>,
+): ReactNode => {
   const {
-    as = DEFAULT_COMPONENT,
+    as = Fragment,
     size,
     matchTo = 'min',
     isDefaultMatches = true,
@@ -65,8 +66,16 @@ const BreakpointRenderFunction = <
       child={child}
     />
   ));
-};
+}) satisfies ForwardRefRenderFunction<
+  HTMLElement,
+  BreakpointProps<ElementType>
+>;
 
-export const Breakpoint = forwardRef(
-  BreakpointRenderFunction as RenderFunction<BreakpointProps<ElementType>>,
-) as typeof BreakpointRenderFunction;
+const Breakpoint = forwardRef(
+  _Breakpoint as ForwardRefRenderFunction<
+    HTMLElement,
+    PropsWithoutRef<BreakpointProps<ElementType>>
+  >,
+) as typeof _Breakpoint;
+
+export { Breakpoint };

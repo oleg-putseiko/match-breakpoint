@@ -1,11 +1,14 @@
 import {
   cloneElement,
   type ComponentProps,
+  type ComponentPropsWithoutRef,
   type ElementType,
+  type ExoticComponent,
   type FC,
   type ForwardedRef,
   forwardRef,
   type ForwardRefRenderFunction,
+  Fragment,
   isValidElement,
   type LegacyRef,
   type PropsWithoutRef,
@@ -21,6 +24,8 @@ import { type ContextualizedBreakpointData } from '@/components/BreakpointsProvi
 import { useBreakpointsContext } from '@/components/BreakpointsProvider/BreakpointsProvider';
 
 type AnyProps = Record<string | symbol | number, any>;
+
+type ExtendedElementType = ElementType | ExoticComponent;
 
 type CSSPresetClassNames = {
   maxClassName: string;
@@ -45,26 +50,31 @@ type BreakpointChildRef<TElement extends ElementType> = ForwardedRef<
   BreakpointChildHTMLElement<TElement>
 >;
 
+type BreakpointChildLegacyRef<TElement extends ElementType> = LegacyRef<
+  BreakpointChildHTMLElement<TElement>
+>;
+
 type BreakpointChildControlledProps<TElement extends ElementType> = {
-  as?: TElement;
+  as: TElement;
   size: ScreenSize;
   matchTo: MatchTo;
   child: ReactNode;
 };
 
-type BreakpointChildNativeProps<TElement extends ElementType> = Omit<
-  ComponentProps<TElement>,
-  'children' | keyof BreakpointChildControlledProps<TElement>
->;
+type BreakpointChildNativeProps<TElement extends ExtendedElementType> =
+  TElement extends ExoticComponent
+    ? ComponentPropsWithoutRef<TElement>
+    : Omit<
+        ComponentPropsWithoutRef<TElement>,
+        keyof BreakpointChildControlledProps<TElement>
+      >;
 
 type BreakpointChildProps<TElement extends ElementType> =
   BreakpointChildNativeProps<TElement> &
     BreakpointChildControlledProps<TElement>;
 
 type BreakpointChildPropsWithRef<TElement extends ElementType> =
-  BreakpointChildProps<TElement> & {
-    ref?: LegacyRef<BreakpointChildHTMLElement<TElement>>;
-  };
+  BreakpointChildProps<TElement> & { ref?: BreakpointChildLegacyRef<TElement> };
 
 interface BreakpointChildFunctionComponent extends FC {
   <TElement extends ElementType>(
@@ -110,7 +120,7 @@ const buildComponentProps = <TElement extends ElementType>(
   } as ComponentProps<TElement>;
 };
 
-const _BreakpointChild = (<TElement extends ElementType>(
+const _BreakpointChild = (<TElement extends ExtendedElementType>(
   props: BreakpointChildProps<TElement>,
   ref: BreakpointChildRef<TElement>,
 ) => {
@@ -125,7 +135,7 @@ const _BreakpointChild = (<TElement extends ElementType>(
     throw new Error(`Breakpoint with screen size "${size}" is not defined`);
   }
 
-  if (!Component && isValidElement(child)) {
+  if (Component === Fragment && isValidElement(child)) {
     return cloneElement(
       child,
       buildComponentProps({
@@ -138,7 +148,7 @@ const _BreakpointChild = (<TElement extends ElementType>(
     );
   }
 
-  if (Component) {
+  if (Component !== Fragment) {
     return (
       <Component
         {...buildComponentProps({
@@ -169,11 +179,11 @@ const _BreakpointChild = (<TElement extends ElementType>(
   BreakpointChildProps<ElementType>
 >;
 
-const BreakpointChild = forwardRef(
+const BreakpointChild: BreakpointChildFunctionComponent = forwardRef(
   _BreakpointChild as ForwardRefRenderFunction<
     HTMLElement,
     PropsWithoutRef<BreakpointChildProps<ElementType>>
   >,
-) as BreakpointChildFunctionComponent;
+);
 
 export { BreakpointChild };

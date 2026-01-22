@@ -1,7 +1,8 @@
 import {
   Children,
-  type ComponentProps,
+  type ComponentPropsWithoutRef,
   type ElementType,
+  type ExoticComponent,
   type FC,
   type ForwardedRef,
   forwardRef,
@@ -19,12 +20,18 @@ import { useBreakpoint } from '@/components/BreakpointsProvider';
 
 type FragmentFC = typeof Fragment;
 
+type ExtendedElementType = ElementType | ExoticComponent;
+
 type BreakpointHTMLElement<TElement extends ElementType> =
   TElement extends keyof HTMLElementTagNameMap
     ? HTMLElementTagNameMap[TElement]
     : HTMLElement;
 
 type BreakpointRef<TElement extends ElementType> = ForwardedRef<
+  BreakpointHTMLElement<TElement>
+>;
+
+type BreakpointLegacyRef<TElement extends ElementType> = LegacyRef<
   BreakpointHTMLElement<TElement>
 >;
 
@@ -36,18 +43,19 @@ type BreakpointControlledProps<TElement extends ElementType> = {
   children: ReactNode;
 };
 
-type BreakpointNativeProps<TElement extends ElementType> = Omit<
-  ComponentProps<TElement>,
-  keyof BreakpointControlledProps<TElement>
->;
+type BreakpointNativeProps<TElement extends ExtendedElementType> =
+  TElement extends ExoticComponent
+    ? ComponentPropsWithoutRef<TElement>
+    : Omit<
+        ComponentPropsWithoutRef<TElement>,
+        keyof BreakpointControlledProps<TElement>
+      >;
 
 type BreakpointProps<TElement extends ElementType> =
   BreakpointNativeProps<TElement> & BreakpointControlledProps<TElement>;
 
 type BreakpointPropsWithRef<TElement extends ElementType> =
-  BreakpointProps<TElement> & {
-    ref?: LegacyRef<BreakpointHTMLElement<TElement>>;
-  };
+  BreakpointProps<TElement> & { ref?: BreakpointLegacyRef<TElement> };
 
 interface BreakpointFunctionComponent extends FC {
   <TElement extends ElementType = FragmentFC>(
@@ -87,11 +95,11 @@ const _Breakpoint = (<TElement extends ElementType = FragmentFC>(
   BreakpointProps<ElementType>
 >;
 
-const Breakpoint = forwardRef(
+const Breakpoint: BreakpointFunctionComponent = forwardRef(
   _Breakpoint as ForwardRefRenderFunction<
     HTMLElement,
     PropsWithoutRef<BreakpointProps<ElementType>>
   >,
-) as BreakpointFunctionComponent;
+);
 
 export { Breakpoint };

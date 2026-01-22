@@ -71,7 +71,7 @@
     "lint-staged": "^15.0.2",
     "prettier": "^3.0.3",
     "tsc-alias": "^1.8.10",
-    "typescript": "^5.9.3"
+    "typescript": "~5.2.2"
   },
   "engines": {
     "node": ">=18.18.0",

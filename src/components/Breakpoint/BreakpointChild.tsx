@@ -2,10 +2,12 @@ import {
   cloneElement,
   type ComponentProps,
   type ElementType,
+  type FC,
   type ForwardedRef,
   forwardRef,
   type ForwardRefRenderFunction,
   isValidElement,
+  type LegacyRef,
   type PropsWithoutRef,
   type ReactNode,
 } from 'react';
@@ -34,6 +36,15 @@ type ComponentPropsBuilderOptions<TElement extends ElementType> = {
   mergeClassesFunction: MergeClassesFunction;
 };
 
+type BreakpointChildHTMLElement<TElement extends ElementType> =
+  TElement extends keyof HTMLElementTagNameMap
+    ? HTMLElementTagNameMap[TElement]
+    : HTMLElement;
+
+type BreakpointChildRef<TElement extends ElementType> = ForwardedRef<
+  BreakpointChildHTMLElement<TElement>
+>;
+
 type BreakpointChildControlledProps<TElement extends ElementType> = {
   as?: TElement;
   size: ScreenSize;
@@ -50,11 +61,16 @@ type BreakpointChildProps<TElement extends ElementType> =
   BreakpointChildNativeProps<TElement> &
     BreakpointChildControlledProps<TElement>;
 
-type BreakpointChildRef<TElement extends ElementType> = ForwardedRef<
-  TElement extends keyof HTMLElementTagNameMap
-    ? HTMLElementTagNameMap[TElement]
-    : HTMLElement
->;
+type BreakpointChildPropsWithRef<TElement extends ElementType> =
+  BreakpointChildProps<TElement> & {
+    ref?: LegacyRef<BreakpointChildHTMLElement<TElement>>;
+  };
+
+interface BreakpointChildFunctionComponent extends FC {
+  <TElement extends ElementType>(
+    props: BreakpointChildPropsWithRef<TElement>,
+  ): ReactNode;
+}
 
 const CLASS_NAME_PRESETS: Record<CSSPresetName, CSSPresetClassNames> = {
   tailwind: {
@@ -158,6 +174,6 @@ const BreakpointChild = forwardRef(
     HTMLElement,
     PropsWithoutRef<BreakpointChildProps<ElementType>>
   >,
-) as typeof _BreakpointChild;
+) as BreakpointChildFunctionComponent;
 
 export { BreakpointChild };

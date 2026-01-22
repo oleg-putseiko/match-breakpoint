@@ -2,10 +2,12 @@ import {
   Children,
   type ComponentProps,
   type ElementType,
+  type FC,
   type ForwardedRef,
   forwardRef,
   type ForwardRefRenderFunction,
   Fragment,
+  type LegacyRef,
   type PropsWithoutRef,
   type ReactNode,
 } from 'react';
@@ -16,6 +18,15 @@ import { BreakpointChild } from '@/components/Breakpoint/BreakpointChild';
 import { useBreakpoint } from '@/components/BreakpointsProvider';
 
 type FragmentFC = typeof Fragment;
+
+type BreakpointHTMLElement<TElement extends ElementType> =
+  TElement extends keyof HTMLElementTagNameMap
+    ? HTMLElementTagNameMap[TElement]
+    : HTMLElement;
+
+type BreakpointRef<TElement extends ElementType> = ForwardedRef<
+  BreakpointHTMLElement<TElement>
+>;
 
 type BreakpointControlledProps<TElement extends ElementType> = {
   as?: TElement;
@@ -33,11 +44,16 @@ type BreakpointNativeProps<TElement extends ElementType> = Omit<
 type BreakpointProps<TElement extends ElementType> =
   BreakpointNativeProps<TElement> & BreakpointControlledProps<TElement>;
 
-type BreakpointRef<TElement extends ElementType> = ForwardedRef<
-  TElement extends keyof HTMLElementTagNameMap
-    ? HTMLElementTagNameMap[TElement]
-    : HTMLElement
->;
+type BreakpointPropsWithRef<TElement extends ElementType> =
+  BreakpointProps<TElement> & {
+    ref?: LegacyRef<BreakpointHTMLElement<TElement>>;
+  };
+
+interface BreakpointFunctionComponent extends FC {
+  <TElement extends ElementType = FragmentFC>(
+    props: BreakpointPropsWithRef<TElement>,
+  ): ReactNode;
+}
 
 const _Breakpoint = (<TElement extends ElementType = FragmentFC>(
   props: BreakpointProps<TElement>,
@@ -76,6 +92,6 @@ const Breakpoint = forwardRef(
     HTMLElement,
     PropsWithoutRef<BreakpointProps<ElementType>>
   >,
-) as typeof _Breakpoint;
+) as BreakpointFunctionComponent;
 
 export { Breakpoint };

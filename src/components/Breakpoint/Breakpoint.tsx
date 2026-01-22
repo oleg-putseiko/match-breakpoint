@@ -15,7 +15,7 @@ import {
 import { type ExtractRef, type RenderFunction } from '@/types/react';
 
 import { BreakpointChild } from '@/components/Breakpoint/BreakpointChild';
-import { useMatchBreakpoint } from '@/components/BreakpointsProvider';
+import { useBreakpoint } from '@/components/BreakpointsProvider';
 
 type BreakpointControlledProps<T extends ElementType> = {
   as?: T;
@@ -51,11 +51,7 @@ const BreakpointRenderFunction = <
     ...componentProps
   } = props;
 
-  const shouldRenderChildren = useMatchBreakpoint(
-    size,
-    matchTo,
-    isDefaultMatches,
-  );
+  const shouldRenderChildren = useBreakpoint(size, matchTo, isDefaultMatches);
 
   if (!shouldRenderChildren) return null;
 

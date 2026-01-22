@@ -1,4 +1,4 @@
-export type ClassNamePreset = 'tailwind';
+export type CSSPresetName = 'tailwind';
 
 type ClassDictionary = Record<string, unknown>;
 type ClassArray = ClassValue[];

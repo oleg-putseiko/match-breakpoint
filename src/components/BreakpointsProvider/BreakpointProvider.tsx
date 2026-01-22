@@ -9,7 +9,7 @@ import {
 
 import { type BreakpointData } from '@/types/breakpoints';
 
-import { extractBreakpointValue } from '@/utils/screen-width';
+import { ensureBreakpointPx } from '@/utils/screen-width';
 
 type BreakpointContext = {
   isMatches: boolean | null;
@@ -38,7 +38,7 @@ export const BreakpointProvider: FC<BreakpointProviderProps> = (props) => {
     DEFAULT_BREAKPOINT_CONTEXT.isMatches,
   );
 
-  const minScreenWidth = extractBreakpointValue(breakpoint.data);
+  const minScreenWidth = ensureBreakpointPx(breakpoint.data);
 
   useEffect(() => {
     const media = window.matchMedia(`(min-width: ${minScreenWidth})`);
@@ -56,7 +56,10 @@ export const BreakpointProvider: FC<BreakpointProviderProps> = (props) => {
     };
   }, [minScreenWidth]);
 
-  const value = useMemo<BreakpointContext>(() => ({ isMatches }), [isMatches]);
+  const context = useMemo<BreakpointContext>(
+    () => ({ isMatches }),
+    [isMatches],
+  );
 
-  return <Provider value={value}>{children}</Provider>;
+  return <Provider value={context}>{children}</Provider>;
 };

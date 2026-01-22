@@ -1,6 +1,6 @@
 import { type BreakpointData } from '@/types/breakpoints';
 
-export const extractBreakpointValue = (breakpointData: BreakpointData) => {
+export const ensureBreakpointPx = (breakpointData: BreakpointData) => {
   if (typeof breakpointData === 'string') return breakpointData;
 
   if (typeof breakpointData === 'number') return `${breakpointData}px`;

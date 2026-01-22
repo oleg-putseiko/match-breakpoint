@@ -11,17 +11,14 @@ import {
 
 import { type MatchTo, type ScreenSize } from '@/types/breakpoints';
 import { type ExtractRef, type RenderFunction } from '@/types/react';
-import {
-  type ClassNamePreset,
-  type MergeClassesFunction,
-} from '@/types/styles';
+import { type CSSPresetName, type MergeClassesFunction } from '@/types/styles';
 
-import { extractBreakpointValue } from '@/utils/screen-width';
+import { ensureBreakpointPx } from '@/utils/screen-width';
 
 import { type ContextualizedBreakpointData } from '@/components/BreakpointsProvider/BreakpointProvider';
 import { useBreakpointsContext } from '@/components/BreakpointsProvider/BreakpointsProvider';
 
-type ClassNamePresetData = {
+type CSSPresetData = {
   maxClassName: string;
   minClassName: string;
 };
@@ -36,7 +33,7 @@ type PropsBuilderOptions<E extends ElementType> = {
   initialProps?: BaseComponentProps;
   matchTo: MatchTo;
   breakpoint: ContextualizedBreakpointData;
-  classNamePreset?: ClassNamePreset;
+  cssPreset?: CSSPresetName;
   mergeClassesFunction: MergeClassesFunction;
 };
 
@@ -57,7 +54,7 @@ type TailwindBreakpointProps<E extends ElementType> = ComponentNativeProps<E> &
 
 const DEFAULT_COMPONENT = Fragment;
 
-const CLASS_NAME_PRESETS: Record<ClassNamePreset, ClassNamePresetData> = {
+const CLASS_NAME_PRESETS: Record<CSSPresetName, CSSPresetData> = {
   tailwind: {
     maxClassName: 'min-[var(--breakpoint)]:hidden',
     minClassName: 'max-[var(--breakpoint)]:hidden',
@@ -70,44 +67,26 @@ const buildProps = <T extends ElementType>(options: PropsBuilderOptions<T>) => {
     initialProps,
     matchTo,
     breakpoint,
-    classNamePreset,
+    cssPreset,
     mergeClassesFunction,
   } = options;
 
-  const classNamePresetData =
-    classNamePreset !== undefined ? CLASS_NAME_PRESETS[classNamePreset] : null;
-  const breakpointValue = extractBreakpointValue(breakpoint.data);
+  const preset = cssPreset ? CLASS_NAME_PRESETS[cssPreset] : null;
+  const presetKey = `${matchTo}ClassName` as const;
 
-  if (matchTo === 'max') {
-    return {
-      ...initialProps,
-      ref,
-      style: {
-        ...initialProps?.style,
-        ['--breakpoint']: breakpointValue,
-      },
-      className: mergeClassesFunction(
-        initialProps?.className,
-        typeof breakpoint.data === 'object'
-          ? breakpoint.data.maxClassName || classNamePresetData?.maxClassName
-          : classNamePresetData?.maxClassName,
-      ),
-    };
-  }
+  const className =
+    typeof breakpoint.data === 'object'
+      ? breakpoint.data[presetKey] || preset?.[presetKey]
+      : preset?.[presetKey];
 
   return {
     ...initialProps,
     ref,
     style: {
       ...initialProps?.style,
-      ['--breakpoint']: breakpointValue,
+      ['--breakpoint']: ensureBreakpointPx(breakpoint.data),
     },
-    className: mergeClassesFunction(
-      initialProps?.className,
-      typeof breakpoint.data === 'object'
-        ? breakpoint.data.minClassName || classNamePresetData?.minClassName
-        : classNamePresetData?.minClassName,
-    ),
+    className: mergeClassesFunction(initialProps?.className, className),
   };
 };
 
@@ -125,7 +104,7 @@ const BreakpointChildRenderFunction = <
     ...componentProps
   } = props;
 
-  const { breakpoints, classNamePreset, mergeClassesFunction } =
+  const { breakpoints, cssPreset, mergeClassesFunction } =
     useBreakpointsContext();
 
   const breakpoint = breakpoints[size];
@@ -141,7 +120,7 @@ const BreakpointChildRenderFunction = <
         initialProps: child.props,
         matchTo,
         breakpoint,
-        classNamePreset,
+        cssPreset,
         mergeClassesFunction,
       }),
     );
@@ -155,7 +134,7 @@ const BreakpointChildRenderFunction = <
           ref,
           matchTo,
           breakpoint,
-          classNamePreset,
+          cssPreset,
           mergeClassesFunction,
         })}
       >
@@ -169,7 +148,7 @@ const BreakpointChildRenderFunction = <
       {...buildProps({
         matchTo,
         breakpoint,
-        classNamePreset,
+        cssPreset,
         mergeClassesFunction,
       })}
     >

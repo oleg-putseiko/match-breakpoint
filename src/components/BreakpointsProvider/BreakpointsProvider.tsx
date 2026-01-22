@@ -11,10 +11,7 @@ import {
   type MatchTo,
   type ScreenSize,
 } from '@/types/breakpoints';
-import {
-  type ClassNamePreset,
-  type MergeClassesFunction,
-} from '@/types/styles';
+import { type CSSPresetName, type MergeClassesFunction } from '@/types/styles';
 
 import {
   BreakpointProvider,
@@ -29,13 +26,13 @@ type ContextualizedBreakpoints = Record<
 
 type BreakpointsContext = {
   breakpoints: ContextualizedBreakpoints;
-  classNamePreset?: ClassNamePreset;
+  cssPreset?: CSSPresetName;
   mergeClassesFunction: MergeClassesFunction;
 };
 
 type BreakpointsProviderProps = {
   breakpoints: Breakpoints;
-  classNamePreset?: ClassNamePreset;
+  cssPreset?: CSSPresetName;
   children: ReactNode;
   mergeClassesFunction?: MergeClassesFunction;
 };
@@ -50,10 +47,10 @@ const BreakpointsContextInstance = createContext(DEFAULT_BREAKPOINTS_CONTEXT);
 export const useBreakpointsContext = () =>
   useContext(BreakpointsContextInstance);
 
-export const useMatchBreakpoint = (
+export const useBreakpoint = (
   size: ScreenSize,
   matchTo: MatchTo = 'min',
-  defaultValue = false,
+  defaultValue: boolean = false,
 ) => {
   const { breakpoints } = useBreakpointsContext();
 
@@ -70,17 +67,15 @@ export const useMatchBreakpoint = (
   return matchTo === 'min' ? isMatches : !isMatches;
 };
 
-export const MatchBreakpointProvider: FC<BreakpointsProviderProps> = (
-  props,
-) => {
+export const BreakpointsProvider: FC<BreakpointsProviderProps> = (props) => {
   const {
     breakpoints,
-    classNamePreset,
+    cssPreset,
     children,
     mergeClassesFunction = DEFAULT_BREAKPOINTS_CONTEXT.mergeClassesFunction,
   } = props;
 
-  const value = useMemo<BreakpointsContext>(
+  const context = useMemo<BreakpointsContext>(
     () => ({
       breakpoints: Object.keys(breakpoints).reduce<ContextualizedBreakpoints>(
         (acc, key) => ({
@@ -92,17 +87,17 @@ export const MatchBreakpointProvider: FC<BreakpointsProviderProps> = (
         }),
         {},
       ),
-      classNamePreset,
+      cssPreset,
       mergeClassesFunction,
     }),
-    [breakpoints, classNamePreset, mergeClassesFunction],
+    [breakpoints, cssPreset, mergeClassesFunction],
   );
 
   return (
-    <BreakpointsContextInstance.Provider value={value}>
-      {Object.keys(value.breakpoints).reduce(
+    <BreakpointsContextInstance.Provider value={context}>
+      {Object.keys(context.breakpoints).reduce(
         (acc, size) => (
-          <BreakpointProvider breakpoint={value.breakpoints[size]}>
+          <BreakpointProvider breakpoint={context.breakpoints[size]}>
             {acc}
           </BreakpointProvider>
         ),
